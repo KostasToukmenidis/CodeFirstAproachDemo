@@ -1,0 +1,217 @@
+﻿@using System.Web.UI.HtmlControls
+@model CodeFirstAproachDemo.Models.Supplier  /*change the binding model to Supplier instead of IEnumeralbe<Supplier> because this is a create view*/
+
+
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+
+<h2>Suppliers Info</h2>
+
+<p>
+    <button type="button" class="btn btn-info" data-toggle="modal" data-target="#supplierModal">New Supplier</button>
+    @*<a href="#" class="btn btn-info" data-toggle="modal" data-target="#supplierModal">New Supplier</a>*@
+</p>
+
+
+@*Supplier creation Modal*@
+<div class="modal fade" id="supplierModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                <h3 class="modal-title">Create Supplier</h3>
+            </div>
+            <div class="modal-body">
+                <form id="supplierForm">
+                    <div class="form-group">
+                        <label>Supplier Name</label>
+                        @Html.TextBoxFor(m => m.Name, new { @class = "form-control" })
+                    </div>
+                    <div class="form-group">
+                        <label>Mobile</label>
+                        @Html.TextBoxFor(m => m.Mobile, new { @class = "form-control" })
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
+                    </div>
+                    <div class="form-group">
+                        <label>Address</label>
+                        @Html.TextBoxFor(m => m.Address, new { @class = "form-control" })
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <a href="#" id="btnSave" class="btn btn-success">Save Supplier</a>
+                <a href="#" id="btnCancel" class="btn btn-danger">Cancel</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@*Delete Supplier confirmation Modal*@
+<div class="modal fade" id="deleteModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                <h3 class="modal-title">Delete confirmation.</h3>
+            </div>
+            <div class="modal-body">
+                <h3>Are you sure you want to delete selected Supplier?</h3>
+            </div>
+            <div class="modal-footer">
+                <a href="#" id="btnDelete" class="btn btn-success">Delete Supplier</a>
+                <a href="#" id="btnDeleteCancel" class="btn btn-danger">Cancel</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@*Supplier edit Modal*@
+<div class="modal fade" id="editModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                <h3 class="modal-title">Create Supplier</h3>
+            </div>
+            <div class="modal-body">
+                <form id="editSupplierForm">
+                    <div class="form-group">
+                        <label>Supplier Name</label>
+                        @Html.TextBoxFor(m => m.Name, new { @class = "form-control" })
+                    </div>
+                    <div class="form-group">
+                        <label>Mobile</label>
+                        @Html.TextBoxFor(m => m.Mobile, new { @class = "form-control" })
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
+                    </div>
+                    <div class="form-group">
+                        <label>Address</label>
+                        @Html.TextBoxFor(m => m.Address, new { @class = "form-control" })
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <a href="#" id="editBtnSave" class="btn btn-success">Save Changes</a>
+                <a href="#" id="editBtnCancel" class="btn btn-danger">Cancel</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@*Table for Suppliers List*@
+<table class="table table-bordered">
+    <tr class="btn-primary">
+        <th>
+            Supplier Name
+        </th>
+        <th>
+            Mobile
+        </th>
+        <th>
+            Email
+        </th>
+        <th>
+            Address
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in ViewBag.Suppliers)
+    {
+        <tr>
+            <td>
+                @item.Name
+            </td>
+            <td>
+                @item.Mobile
+            </td>
+            <td>
+                @item.Email
+            </td>
+            <td>
+                @item.Address
+            </td>
+            <td>
+                <a href="#" id="showEditModal" class="btn btn-warning" onclick="EditConfirm(@item.Id)">Edit</a> |
+                <a href="#" id="showModal" class="btn btn-danger" onclick="Confirm(@item.Id)">Delete</a>   @*This onclick function is called later in my script tag. Has to have the exhact same name to work*@
+            </td>
+        </tr>
+    }
+
+</table>
+
+@*Holding temporary the id of the entry i want to be deleted, type will be hidden*@
+<input type="text" id="supplierId" />
+
+
+@*Ajax script for supplierModal*@
+<script>
+    $(document).ready(function() {
+        $("#btnSave").click(function() {
+            var supplierFormData = $("#supplierForm").serialize();  @*converts all the data passed in the supplierForm to string*@
+            $.ajax({
+                type: "POST",                                       @*type of the request*@
+                url: "/Supplier/SaveSupplier",                      @*url at witch the request is sent*@
+                data: supplierFormData,                             @*source of the data that will be sent to the server*@
+                success: function() {                               @*called if request is successfull*@
+                    window.location.href = "/Supplier/Index";
+                }
+            });
+        });
+
+        $("#btnCancel").click(() => {
+            window.location.href = "/Supplier/Index";
+        });
+
+
+        @*Ajax call for delete operation*@
+        $("#btnDelete").click(function () {
+            var idToDelete = $("#supplierId").val();
+            $.ajax({
+                type: "POST",
+                url: "/Supplier/Delete",
+                data: { id: idToDelete },
+                success: function(result) {   @*This result will take the value of the result boolean i am returning from the JsonAction Delete in my controller*@
+                    if (result) {
+                        $("#deleteModal").modal("hide");
+                        $("#supplierId").val(null);
+                        window.location.href = "/Supplier/Index";
+                    } else {
+                        alert("Could not find that supplier in the database, refresh and try again.");
+                    }
+                }
+            });
+        });
+
+    });
+
+    @*Confirm is an onclick function created in my delete button, var has to have to exhact same name*@
+    var Confirm = function (id) {
+        $("#supplierId").val(id); /*Setting the value of the input element with the specific #id*/
+        $("#deleteModal").modal("show");
+    }
+
+    @*Cancel button for Delete Confirmation Modal also works in the $(document).ready codeblock*@
+    $("#btnDeleteCancel").click(() => {
+        window.location.href = "/Supplier/Index";
+    });
+
+    @*EditConfirm is an onclick function created in my edit button*@
+    var EditConfirm = function(id) {
+        $("#supplierId").val(id);
+        $("#editModal").modal("show");
+    }
+
+    $("#editBtnCancel").click(() => {
+        window.location.href = "/Supplier/Index";
+    });
+
+</script>
