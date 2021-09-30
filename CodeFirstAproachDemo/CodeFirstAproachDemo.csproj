@@ -175,6 +175,7 @@
       <DependentUpon>202109230953478_AddingSuppliersEntity.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\GitTest.cs" />
     <Compile Include="Models\GunStoreDbContext.cs" />
     <Compile Include="Models\Supplier.cs" />
     <Compile Include="Models\User.cs" />
